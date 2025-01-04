@@ -30,3 +30,5 @@ Makefile
 
 # Ignore backup files
 *~
+
+all_res.hpp
