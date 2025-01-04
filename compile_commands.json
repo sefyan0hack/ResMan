@@ -1,0 +1,8 @@
+[
+{
+  "directory": "C:/Users/sefyan/Documents/c_projects/ResMan/build",
+  "command": "C:\\mingw64\\bin\\g++.exe   -Wall -Wextra -pedantic -O0 -g3 -ggdb  -std=gnu++23 -o CMakeFiles\\ResMan.dir\\main.cpp.obj -c C:\\Users\\sefyan\\Documents\\c_projects\\ResMan\\main.cpp",
+  "file": "C:/Users/sefyan/Documents/c_projects/ResMan/main.cpp",
+  "output": "CMakeFiles/ResMan.dir/main.cpp.obj"
+}
+]
