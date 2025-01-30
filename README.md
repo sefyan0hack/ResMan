@@ -31,4 +31,4 @@ The result will be a recursive copy of all folders inside `<res_folder>`, stored
 - .dsd .dff .dsf .spx .voc .au .ra .rm .caf
 
 # Note
-The file name should be clear from this `char`s `'\\', '/', '.' ,'space', '!', '!', '"', '@', '#', '$', '%', '&', '*', '(',')', '-', '=', '+', '`', ';', '~', '[', ']', '{', '}'`  for now at least
+The file name should be clear from this `char`s `\, /, . , space, !, ", @, #, $, %, &, *, (, ), -, =, +, ;, ~, [, ], {, }` for now at least
