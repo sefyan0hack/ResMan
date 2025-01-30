@@ -2,6 +2,7 @@
 
 `Resource Manager` is a single C++ file that transforms files into C++ code, generating:
 
+```
 constexpr unsigned int file_array[];
 constexpr unsigned int file_size;
 ```
