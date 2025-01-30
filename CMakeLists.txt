@@ -15,8 +15,3 @@ set(CMAKE_CXX_FLAGS_DEBUG "${WAR_PANIC} -O0 -g3 -ggdb ")  # Debugging for GCC/Cl
 
 
 add_executable(ResMan main.cpp)
-
-set_target_properties( ResMan
-    PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
