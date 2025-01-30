@@ -1,0 +1,141 @@
+name: Build and Upload Binaries
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # Build for Windows 32-bit
+  build-win32:
+    runs-on: windows-latest
+    name: Build for Win32
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up MinGW (32-bit)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW32
+
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm
+
+      - name: Build project
+        run: |
+          mkdir build && cd build
+          cmake -G "MSYS Makefiles" ..
+          make
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: win32-binary
+          path: build/*
+
+  # Build for Windows 64-bit
+  build-win64:
+    runs-on: windows-latest
+    name: Build for Win64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up MinGW (64-bit)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm
+
+      - name: Build project
+        run: |
+          mkdir build && cd build
+          cmake -G "MSYS Makefiles" ..
+          make
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: win64-binary
+          path: build/*
+
+  # Build for Linux 32-bit
+  build-linux32:
+    runs-on: ubuntu-latest
+    name: Build for Linux32
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential gcc-multilib g++-multilib
+
+      - name: Build project
+        run: |
+          mkdir build && cd build
+          cmake -DCMAKE_CXX_FLAGS="-m32" ..
+          make
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux32-binary
+          path: build/*
+
+  # Build for Linux 64-bit
+  build-linux64:
+    runs-on: ubuntu-latest
+    name: Build for Linux64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential
+
+      - name: Build project
+        run: |
+          mkdir build && cd build
+          cmake ..
+          make
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux64-binary
+          path: build/*
+
+  # Build for Android
+  build-android:
+    runs-on: ubuntu-latest
+    name: Build for Android
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Android SDK
+        uses: reactivecircus/android-sdk-manager-action@v2
+        with:
+          api-level: 30
+          build-tools-version: 30.0.3
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+
+      - name: Build project for Android
+        run: |
+          mkdir build && cd build
+          cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a ..
+          cmake --build . --target install
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-binary
+          path: build/*
