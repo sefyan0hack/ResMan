@@ -20,6 +20,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        
+      - name: Install Ninja
+        run: choco install ninja -y
 
       - name: Setup MSVC Environment
         uses: ilammy/msvc-dev-cmd@v1
