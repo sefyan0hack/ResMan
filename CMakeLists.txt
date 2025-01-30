@@ -8,6 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Define warning flags
 set(WAR_PANIC "-Wall -Wextra -pedantic")
+add_executable(ResMan main.cpp)
 
 if(MSVC)
     target_compile_options(ResMan PRIVATE
@@ -32,5 +33,3 @@ set(CMAKE_CXX_FLAGS_RELEASE "${WAR_PANIC} -O2 -s -flto -fdata-sections -ffunctio
 set(CMAKE_CXX_FLAGS_DEBUG "${WAR_PANIC} -O0 -g3 -ggdb ")  # Debugging for GCC/Clang
 endif()
 
-
-add_executable(ResMan main.cpp)
