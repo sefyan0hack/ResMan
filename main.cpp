@@ -273,7 +273,7 @@ auto between(std::time_t number, std::time_t bound1, std::time_t bound2) -> bool
 
 auto replaceSymb(const fs::path& path) -> std::string {
     constexpr char UnwantedSym[] = {
-        '\\', '/', '.' ,' ', '!', '!', '"', '@', '#', '$', '%', '&', '*', '(',')', '-', '=', '+', '`', ';', '~', '[', ']', '{', '}'
+        '\\', '/', '.' ,' ', '!', '"', '@', '#', '$', '%', '&', '*', '(',')', '-', '=', '+', '`', ';', '~', '[', ']', '{', '}'
     };
     auto name = path.string();
 
