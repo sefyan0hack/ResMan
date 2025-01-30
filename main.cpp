@@ -4,7 +4,9 @@
 #include <filesystem>
 #include <fstream>
 #include <algorithm>
+#include <ranges>
 #include <system_error>
+#include <array>
 
 namespace fs = std::filesystem;
 
@@ -36,6 +38,34 @@ unsigned int Img_count = 0;
 unsigned int Sound_count = 0;
 
 constexpr const char* FinalIncludeFile = "all_res.hpp";
+
+constexpr auto img_ext = std::array{
+    // Raster Image Formats
+    ".jpeg", ".jpg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp",
+    ".heif", ".heic", ".avif", ".ico", ".tga", ".xbm", ".pbm", ".pgm", ".ppm", ".raw",
+    // Vector Image Formats
+    ".svg", ".eps", ".pdf", ".ai", ".cdr", ".swf", ".emf", ".wmf", ".dxf",
+    // Raw Camera Image Formats
+    ".crw", ".cr2", ".cr3", ".nef", ".arw", ".sr2", ".srf", ".raf", ".dng", ".orf",
+    ".pef", ".rw2", ".kdc", ".erf", ".mef", ".srw",
+    // 3D & Specialized Image Formats
+    ".psd", ".xcf", ".exr", ".hdr", ".cin", ".dpx", ".dds", ".sgi", ".rle", ".jfif"
+};
+
+constexpr auto audio_ext = std::array{
+    // Uncompressed Audio Formats
+    ".wav", ".aiff", ".pcm", ".bwf",
+    // Lossless Audio Formats
+    ".flac", ".alac", ".ape", ".wv", ".tta", ".shn",
+    // Lossy Audio Formats
+    ".mp3", ".aac", ".ogg", ".opus", ".wma", ".m4a", ".mp2", ".amr",
+    // Module & Tracker Formats
+    ".mod", ".xm", ".s3m", ".it", ".mtm", ".umx",
+    // MIDI & Synthesized Formats
+    ".mid", ".midi", ".rmi",
+    // Other / Specialized Formats
+    ".dsd", ".dff", ".dsf", ".spx", ".voc", ".au", ".ra", ".rm", ".caf"
+};
 
 auto main(int argc, char** argv) -> int {
     if(argc < 2){
@@ -175,11 +205,12 @@ auto main(int argc, char** argv) -> int {
             auto dest_path_lexnormal = dest_path.lexically_normal();
 
             std::string rtype;
-
-            if(p.extension() == ".png"){
+            const auto ext = p.extension();
+            
+            if(std::ranges::find(img_ext, ext) != img_ext.end()){
                 rtype = "IMG";
                 Img_count++;
-            }else if(p.extension() == ".wav"){
+            }else if(std::ranges::find(audio_ext, ext) != audio_ext.end()){
                 rtype = "AUDIO";
                 Sound_count++;
             }else{
