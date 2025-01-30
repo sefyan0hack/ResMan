@@ -1,7 +1,7 @@
 ## Resource Manager
 
-`Resource Manager` single c++ file  that stransform files to c++ file that have  
-```
+`Resource Manager` is a single C++ file that transforms files into C++ code, generating:
+
 constexpr unsigned int file_array[];
 constexpr unsigned int file_size;
 ```
@@ -13,9 +13,8 @@ constexpr unsigned int file_size;
 ResMan <res folder>
 ```
 
-The the result would be a copy of folders recusivly  that exist in `<res folder>` in  floder `<res folder>/c` in `.h` (c++ header) 
-and `<res folder>/all_res.hpp`
+The result will be a recursive copy of all folders inside `<res_folder>`, stored in `<res_folder>/c` as .h (C++ headers) and in `<res_folder>/all_res.hpp`.
 
-## Supported Ext 
+## Supported Extensions 
  - .png
  - .wav
