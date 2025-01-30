@@ -8,6 +8,19 @@ constexpr unsigned int file_size;
 ```
 
 
+## Build
+```
+mkdir build
+cd build
+
+cmake ..
+make 
+```
+note that the project single `cpp` file so you dont need  `cmake` or `make`
+
+```
+g++ -std=c++23 main.cpp -o ResMan
+```
 ## Usage
 
 ```
