@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read   # Needed for downloading artifacts
     steps:
       - name: Validate Tag Format
         run: |
