@@ -24,7 +24,6 @@ jobs:
         uses: dawidd6/action-download-artifact@v9
         with:
           path: artifact
-          pattern: ResMan*
           merge_multiple: true
           workflow: Build.yml
           github_token: ${{secrets.GITHUB_TOKEN}}
@@ -44,12 +43,13 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: List Artifacts
+        run: ls -R ./artifact
+
       - name: Upload Release Assets
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+        uses: AButler/upload-release-assets@v3
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifact/ResMan*
-          asset_name: ${{ github.ref_name }}/$(basename %asset_path%)
-          asset_content_type: application/octet-stream
+            files: ./artifact/**/ResMan*
+            upload-url: ${{ steps.create_release.outputs.upload_url }}
+            asset-name: "${{ github.ref_name }}/%(file_name)s"
+            token: ${{ github.token }}
