@@ -1,0 +1,243 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  # Build for Windows 32/64-bit
+  build-windows:
+    runs-on: windows-latest
+    name: Windows
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86, x64]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Install Ninja
+        run: choco install ninja -y
+
+      - name: Setup MSVC Environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+
+      - name: Configure CMake (Release)
+        run: cmake -G "Ninja" -B build/${{ matrix.arch }}/release -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (Release)
+        run: cmake --build build/${{ matrix.arch }}/release
+
+      - name: Rename Binary
+        run: |
+          cd build/${{ matrix.arch }}/release/
+          ren ResMan.exe ResMan-Win-${{ matrix.arch }}.exe
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ResMan_win${{ matrix.arch }}
+          path: build/${{ matrix.arch }}/release/ResMan-Win-${{ matrix.arch }}.exe
+
+
+  # Linux Builds (x86/x64/ARM)
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86, x64, armv7, aarch64]
+    name: Linux (${{ matrix.arch }})
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          case "${{ matrix.arch }}" in
+            x86)
+              sudo apt-get install -y gcc-multilib g++-multilib make
+              ;;
+            armv7)
+              sudo apt-get install -y \
+                gcc-arm-linux-gnueabihf \
+                g++-arm-linux-gnueabihf \
+                make \
+                qemu-user-static
+              ;;
+            aarch64)
+              sudo apt-get install -y \
+                gcc-aarch64-linux-gnu \
+                g++-aarch64-linux-gnu \
+                make \
+                qemu-user-static
+              ;;
+            *)
+              sudo apt-get install -y build-essential
+              ;;
+          esac
+
+      - name: Configure Build
+        run: |
+          BUILD_DIR="build"
+          mkdir -p $BUILD_DIR
+          
+          case "${{ matrix.arch }}" in
+            x86)
+              cmake -B $BUILD_DIR \
+                -DCMAKE_CXX_FLAGS="-m32" \
+                -DCMAKE_C_FLAGS="-m32" \
+                -DCMAKE_MAKE_PROGRAM=make
+              ;;
+            armv7)
+              cmake -B $BUILD_DIR \
+                -DCMAKE_SYSTEM_NAME=Linux \
+                -DCMAKE_SYSTEM_PROCESSOR=arm \
+                -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc \
+                -DCMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
+                -DCMAKE_MAKE_PROGRAM=make
+              ;;
+            aarch64)
+              cmake -B $BUILD_DIR \
+                -DCMAKE_SYSTEM_NAME=Linux \
+                -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+                -DCMAKE_C_COMPILER=aarch64-linux-gnu-gcc \
+                -DCMAKE_CXX_COMPILER=aarch64-linux-gnu-g++ \
+                -DCMAKE_MAKE_PROGRAM=make
+              ;;
+            *)
+              cmake -B $BUILD_DIR \
+                -DCMAKE_MAKE_PROGRAM=make
+              ;;
+          esac
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Rename Linux binary
+        run: |
+          cd build
+          mv ResMan ResMan-Linux-${{ matrix.arch }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ResMan_linux_${{ matrix.arch }}
+          path: build/ResMan-Linux-${{ matrix.arch }}
+          retention-days: 7
+      - name: check
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -l build/ResMan-* || true
+          ls -l build/Release/ResMan-* || true
+
+ # Build for Android
+  build-android:
+    runs-on: ubuntu-latest
+    name: Android (${{ matrix.abi }})
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: [armeabi-v7a, arm64-v8a, x86, x86_64]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Android NDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            ndk;26.2.11394342
+          cmdline-tools-version: "latest"
+          accept-android-sdk-licenses: true
+
+      - name: Check compiler
+        run: |
+          $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --version
+
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+          -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake \
+          -DANDROID_ABI=${{ matrix.abi }} \
+          -DANDROID_PLATFORM=21 \
+          -DCMAKE_BUILD_TYPE=Release \
+
+      - name: Build
+        run: cmake --build build -- -j 4
+        
+      - name: Rename Android binary
+        run: |
+          cd build
+          mv ResMan ResMan-Android-${{ matrix.abi }}
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ResMan_android_${{ matrix.abi }}
+          path: build/ResMan-Android-${{ matrix.abi }}
+          retention-days: 7
+      - name: check
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -l build/ResMan-* || true
+          ls -l build/Release/ResMan-* || true
+
+
+  # Build for macOS
+  build-macos:
+    runs-on: macos-latest
+    name: macOS
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          brew update || true
+          if ! brew list --formula cmake &>/dev/null; then
+            echo "Installing CMake..."
+            brew install --formula cmake
+          else
+            echo "CMake already installed"
+          fi
+          
+          if ! brew list --formula ninja &>/dev/null; then
+            echo "Installing Ninja..."
+            brew install --formula ninja
+          else
+            echo "Ninja already installed"
+          fi
+
+      - name: Check compiler
+        run: |
+          c++ --version
+          which c++
+
+      - name: Configure CMake (Release)
+        run: cmake -G "Ninja" -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (Release)
+        run: cmake --build build --config Release
+
+      - name: Rename MacOS binary
+        run: |
+          cd build
+          mv ResMan ResMan-MacOS
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ResMan_macos
+          path: build/ResMan-MacOS
+          retention-days: 7
+      - name: check
+        run: |
+          echo "Current directory: $(pwd)"
+          ls -l build/ResMan-* || true
+          ls -l build/Release/ResMan-* || true
