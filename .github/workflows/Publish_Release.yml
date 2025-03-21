@@ -35,7 +35,7 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref_name }}
           release_name: "ResMan ${{ github.ref_name }}"
@@ -43,13 +43,21 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: List Artifacts
-        run: ls -R ./artifact
+      - name: List Unzipped Files (Debug)
+        run: find ./artifact -type f -name "ResMan-*"
 
       - name: Upload Release Assets
         uses: AButler/upload-release-assets@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         with:
-            files: ./artifact/**/ResMan*
-            upload-url: ${{ steps.create_release.outputs.upload_url }}
-            asset-name: "${{ github.ref_name }}/%(file_name)s"
-            token: ${{ github.token }}
+          tag_name: ${{ github.ref_name }}
+          name: "ResMan ${{ github.ref_name }}"
+          body: "Pre-built binaries for ResMan ${{ github.ref_name }}"
+          files: |
+            artifact/**/ResMan*  # Uploads all matching files recursively
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
