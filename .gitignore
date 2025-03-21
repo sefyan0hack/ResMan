@@ -1,0 +1,34 @@
+# CMake build directory
+/build/
+*.build/
+
+# Visual Studio Code settings
+.vscode/
+*.code-workspace
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.o
+*.obj
+*.pdb
+*.idb
+
+# Compiled binary files
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.dylib
+
+# Temporary files
+*.tmp
+*.temp
+
+# Ignore backup files
+*~
+
+all_res.hpp
